@@ -1,0 +1,121 @@
+<html>
+    <head>
+        <title>Weather App</title>
+        <link rel="stylesheet" href="style.css">
+        <style>
+            .error {
+                color: rgb(255, 255, 255);
+                display: none; /* Hide the error message by default */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="search">
+                <input type="text" placeholder="Enter the city name" spellcheck="false">
+                <button><img src="img.jpg" alt="" style="height: 15px; width: 15px;"></button> 
+            </div>
+            <div class="error">
+                <p>Invalid city name</p>
+            </div>
+            <div class="weather" style="display: none;"> <!-- Initially hide the weather info -->
+                <img src="img2.jpg" class="weather-icon" alt="Weather Icon">
+                <h1 class="temp">22°C</h1>
+                <h2 class="city">Coimbatore</h2>
+                <div class="details">
+                    <div class="col">
+                        <img src="img3.jpg" alt="">
+                        <div>
+                            <p class="humidity">50%</p>
+                            <p>Humidity</p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <img src="img4.jpg" alt="">
+                        <div>
+                            <p class="wind">15km/hr</p>
+                            <p>Wind Speed</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            const apiKey = "11e21feca9f9dc8745ae42cea3881f49";
+            const baseUrl = "https://api.openweathermap.org/data/2.5/weather";
+
+            const searchBox = document.querySelector(".search input");
+            const searchBtn = document.querySelector(".search button");
+            const weatherIcon = document.querySelector(".weather-icon");
+            const errorDiv = document.querySelector(".error");
+            const weatherDiv = document.querySelector(".weather");
+
+            async function checkWeather(city) {
+                const apiUrl = `${baseUrl}?units=metric&q=${city}&appid=${apiKey}`;
+                try {
+                    const response = await fetch(apiUrl);
+                    
+                    if (!response.ok) {
+                        throw new Error('City not found');
+                    }
+                    const data = await response.json();
+                    console.log(data);
+
+                    document.querySelector(".city").innerHTML = data.name;
+                    document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+                    document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+                    document.querySelector(".wind").innerHTML = data.wind.speed + " km/hr";
+
+                    // Update weather icon based on the weather condition
+                    switch (data.weather[0].main) {
+                        case "Clouds":
+                            weatherIcon.src = "cloud.jpg";
+                            break;
+                        case "Clear":
+                            weatherIcon.src = "clear.jpg";
+                            break;
+                        case "Snow":
+                            weatherIcon.src = "snow.jpg";
+                            break;
+                        case "Mist":
+                            weatherIcon.src = "mist.jpg";
+                            break;
+                        case "Drizzle":
+                            weatherIcon.src = "drizzle.jpg";
+                            break;
+                        default:
+                            weatherIcon.src = "img2.jpg"; // Fallback image
+                    }
+
+                    // Show weather information and hide error message
+                    weatherDiv.style.display = "block";
+                    errorDiv.style.display = "none";
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
+                    
+                    // Hide weather information and show error message
+                    weatherDiv.style.display = "none";
+                    errorDiv.style.display = "block";
+                }
+            }
+            function handleSearch() {
+                const city = searchBox.value.trim();
+                if (city) {
+                    checkWeather(city);
+                } else {
+                    console.error('Please enter a city name.');
+                    weatherDiv.style.display = "none";
+                    errorDiv.style.display = "block";
+                }
+            }
+
+            searchBtn.addEventListener("click", handleSearch);
+
+            searchBox.addEventListener("keydown", (event) => {
+                if (event.key === "Enter") {
+                    handleSearch();
+                }
+            });
+        </script>
+    </body>
+</html>
